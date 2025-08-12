@@ -7,21 +7,56 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="game-container">
-        <h1>Petualangan Matematika</h1>
-        <div id="adventure-area">
-            <p id="story">Bantu pahlawan kita menyelesaikan misi dengan menjawab soal matematika!</p>
-            <div id="progress-bar-container">
-                <div id="progress-bar"></div>
+    <!-- Start Screen -->
+    <div id="start-screen" class="screen active">
+        <h1>Selamat Datang di Petualangan Matematika!</h1>
+        <p>Pilih tingkat kesulitan dan jenis soal untuk memulai.</p>
+        <div class="options-container">
+            <div class="option-group">
+                <h2>Tingkat Kesulitan:</h2>
+                <button class="option-btn difficulty" data-difficulty="easy">Mudah</button>
+                <button class="option-btn difficulty" data-difficulty="medium">Sedang</button>
+                <button class="option-btn difficulty" data-difficulty="hard">Sulit</button>
+            </div>
+            <div class="option-group">
+                <h2>Jenis Operasi:</h2>
+                <button class="option-btn operation" data-operation="addition">+</button>
+                <button class="option-btn operation" data-operation="subtraction">-</button>
+                <button class="option-btn operation" data-operation="multiplication">x</button>
             </div>
         </div>
-        <div id="quiz-area">
-            <p id="question">Pertanyaan akan muncul di sini</p>
-            <input type="number" id="answer-input" placeholder="Masukkan jawabanmu">
-            <button id="submit-btn">Jawab</button>
-        </div>
-        <p id="feedback"></p>
+        <button id="start-game-btn">Mulai Game</button>
     </div>
+
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen">
+        <div id="game-container">
+            <div id="stats-container">
+                <p>Skor: <span id="score">0</span></p>
+                <p>Soal: <span id="question-counter">1/5</span></p>
+            </div>
+            <div id="adventure-area">
+                <div id="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+            </div>
+            <div id="quiz-area">
+                <p id="question">Pertanyaan akan muncul di sini</p>
+                <input type="number" id="answer-input" placeholder="Masukkan jawabanmu">
+                <button id="submit-btn">Jawab</button>
+            </div>
+            <p id="feedback"></p>
+        </div>
+    </div>
+
+    <!-- End Screen -->
+    <div id="end-screen" class="screen">
+        <h1>Permainan Selesai!</h1>
+        <p>Skor Akhir Kamu:</p>
+        <h2 id="final-score">0</h2>
+        <button id="play-again-btn">Main Lagi</button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
