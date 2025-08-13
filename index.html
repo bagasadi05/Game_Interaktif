@@ -35,9 +35,10 @@
                 <p>Skor: <span id="score">0</span></p>
                 <p>Soal: <span id="question-counter">1/5</span></p>
             </div>
+            <button id="mute-btn">🔊</button>
             <div id="adventure-area">
-                <div id="progress-bar-container">
-                    <div id="progress-bar"></div>
+                <div id="adventure-path">
+                    <img id="player-icon" src="https://raw.githubusercontent.com/twitter/twemoji/master/assets/svg/1f6b6.svg" alt="Pemain">
                 </div>
             </div>
             <div id="quiz-area">
@@ -58,5 +59,10 @@
     </div>
 
     <script src="script.js"></script>
+
+    <!-- Audio Files -->
+    <audio id="sound-correct" src="assets/correct.mp3" preload="auto"></audio>
+    <audio id="sound-wrong" src="assets/wrong.mp3" preload="auto"></audio>
+    <audio id="sound-click" src="assets/click.mp3" preload="auto"></audio>
 </body>
 </html>

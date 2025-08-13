@@ -91,7 +91,27 @@ h2 {
 
 /* Game Screen Styles */
 #game-container {
+    position: relative; /* For positioning mute button */
     width: 100%;
+}
+
+#mute-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: none;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    z-index: 10;
+}
+
+#mute-btn:hover {
+    background-color: #f0f0f0;
 }
 #stats-container {
     display: flex;
@@ -109,19 +129,23 @@ h2 {
     background-color: #F0FFF0; /* Honeydew */
 }
 
-#progress-bar-container {
-    width: 100%;
-    background-color: #e0e0e0;
-    border-radius: 13px;
-    padding: 3px;
+#adventure-path {
+    position: relative;
+    height: 50px;
+    background-color: #d2b48c; /* Tan, like a path */
+    border: 2px solid #8b4513; /* SaddleBrown */
+    border-radius: 25px;
+    margin-top: 10px;
 }
 
-#progress-bar {
-    width: 0%; /* Starts empty */
-    height: 20px;
-    background-color: #4CAF50; /* Green */
-    border-radius: 10px;
-    transition: width 0.5s ease-in-out;
+#player-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px; /* Starts at the beginning */
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    transition: left 0.5s ease-in-out;
 }
 
 #quiz-area {
@@ -224,4 +248,35 @@ h2 {
         margin-left: 0;
         width: 60%;
     }
+}
+
+/* --- Animations --- */
+
+/* For incorrect answers */
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-10px); }
+    40%, 80% { transform: translateX(10px); }
+}
+
+/* For score pops or correct answers */
+.pop {
+    animation: pop 0.3s ease-out;
+}
+@keyframes pop {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+/* For elements fading in */
+.fadeIn {
+    animation: fadeIn 0.5s ease-in;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
