@@ -23,7 +23,12 @@
                 <button class="option-btn operation" data-operation="addition">+</button>
                 <button class="option-btn operation" data-operation="subtraction">-</button>
                 <button class="option-btn operation" data-operation="multiplication">x</button>
+                <button class="option-btn operation" data-operation="division">÷</button>
+                <button class="option-btn operation" data-operation="mixed">?</button>
             </div>
+        </div>
+        <div id="high-score-container">
+            Skor Tertinggi: <span id="high-score">...</span>
         </div>
         <button id="start-game-btn">Mulai Game</button>
     </div>
@@ -60,9 +65,12 @@
 
     <script src="script.js"></script>
 
-    <!-- Audio Files -->
-    <audio id="sound-correct" src="assets/correct.mp3" preload="auto"></audio>
-    <audio id="sound-wrong" src="assets/wrong.mp3" preload="auto"></audio>
-    <audio id="sound-click" src="assets/click.mp3" preload="auto"></audio>
+    <!--
+      TODO: Tambahkan URL file suara Anda di sini.
+      Contoh: src="https://example.com/sounds/correct.mp3"
+    -->
+    <audio id="sound-correct" src="" preload="auto"></audio>
+    <audio id="sound-wrong" src="" preload="auto"></audio>
+    <audio id="sound-click" src="" preload="auto"></audio>
 </body>
 </html>

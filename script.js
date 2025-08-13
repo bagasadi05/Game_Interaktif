@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const questionCounterElement = document.getElementById('question-counter');
     const finalScoreElement = document.getElementById('final-score');
     const playerIcon = document.getElementById('player-icon');
+    const highScoreElement = document.getElementById('high-score');
 
     // Audio Elements
     const soundCorrect = document.getElementById('sound-correct');
@@ -40,10 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
         easy: { min: 1, max: 10 },
         medium: { min: 10, max: 50 },
         hard: { min: 20, max: 100 },
-        multiplication_easy: { min: 1, max: 5 },
-        multiplication_medium: { min: 2, max: 10 },
-        multiplication_hard: { min: 5, max: 12 }
+        multiplication_easy: { min: 2, max: 9 },
+        multiplication_medium: { min: 3, max: 12 },
+        multiplication_hard: { min: 5, max: 15 },
+        division_easy: { min: 2, max: 9 }, // Divisor range
+        division_medium: { min: 3, max: 12 },
+        division_hard: { min: 5, max: 15 }
     };
+
+    const OPERATIONS = ['addition', 'subtraction', 'multiplication', 'division'];
 
     // === FUNCTIONS ===
 
@@ -58,6 +64,30 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isMuted) {
             sound.currentTime = 0;
             sound.play().catch(error => console.error(`Audio play failed: ${error}`));
+        }
+    }
+
+    // --- High Score Logic ---
+    function getHighScoreKey(difficulty, operation) {
+        if (!difficulty || !operation) return null;
+        return `highscore-${difficulty}-${operation}`;
+    }
+
+    function getHighScore(key) {
+        return parseInt(localStorage.getItem(key), 10) || 0;
+    }
+
+    function setHighScore(key, score) {
+        localStorage.setItem(key, score);
+    }
+
+    function updateHighScoreDisplay() {
+        const key = getHighScoreKey(gameSettings.difficulty, gameSettings.operation);
+        if (key) {
+            const highScore = getHighScore(key);
+            highScoreElement.textContent = highScore;
+        } else {
+            highScoreElement.textContent = '...';
         }
     }
 
@@ -78,6 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 buttons.forEach(btn => btn.classList.remove('selected'));
                 button.classList.add('selected');
                 gameSettings[category] = button.dataset[category];
+                updateHighScoreDisplay();
             });
         });
     }
@@ -102,6 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
         gameSettings.difficulty = null;
         gameSettings.operation = null;
         playerIcon.style.left = '0px';
+        updateHighScoreDisplay();
         showScreen('start-screen');
     }
 
@@ -122,26 +154,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function generateQuestion() {
-        const { difficulty, operation } = gameSettings;
-        const rangeKey = operation === 'multiplication' ? `${operation}_${difficulty}` : difficulty;
-        const { min, max } = DIFFICULTY_RANGES[rangeKey];
-        let num1 = Math.floor(Math.random() * (max - min + 1)) + min;
-        let num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+        const { difficulty } = gameSettings;
+        let operation = gameSettings.operation;
 
+        // If mode is 'mixed', pick a random operation for this question
+        if (operation === 'mixed') {
+            operation = OPERATIONS[Math.floor(Math.random() * OPERATIONS.length)];
+        }
+
+        const rangeKey = `${operation}_${difficulty}`;
+        const defaultRangeKey = difficulty;
+        const { min, max } = DIFFICULTY_RANGES[rangeKey] || DIFFICULTY_RANGES[defaultRangeKey];
+
+        let num1, num2;
         let questionText;
+
         switch(operation) {
             case 'addition':
+                num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+                num2 = Math.floor(Math.random() * (max - min + 1)) + min;
                 correctAnswer = num1 + num2;
                 questionText = `Berapa ${num1} + ${num2}?`;
                 break;
             case 'subtraction':
+                num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+                num2 = Math.floor(Math.random() * (max - min + 1)) + min;
                 if (num1 < num2) [num1, num2] = [num2, num1];
                 correctAnswer = num1 - num2;
                 questionText = `Berapa ${num1} - ${num2}?`;
                 break;
             case 'multiplication':
+                num1 = Math.floor(Math.random() * (max - min + 1)) + min;
+                num2 = Math.floor(Math.random() * (max - min + 1)) + min;
                 correctAnswer = num1 * num2;
                 questionText = `Berapa ${num1} x ${num2}?`;
+                break;
+            case 'division':
+                // Work backwards to ensure whole number result
+                const answer = Math.floor(Math.random() * (max - min + 1)) + min;
+                num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+                num1 = answer * num2;
+                correctAnswer = answer;
+                questionText = `Berapa ${num1} ÷ ${num2}?`;
                 break;
         }
         questionElement.textContent = questionText;
@@ -177,6 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function endGame() {
         finalScoreElement.textContent = score;
+
+        const key = getHighScoreKey(gameSettings.difficulty, gameSettings.operation);
+        const currentHighScore = getHighScore(key);
+        if (score > currentHighScore) {
+            setHighScore(key, score);
+            updateHighScoreDisplay();
+        }
+
         showScreen('end-screen');
     }
 

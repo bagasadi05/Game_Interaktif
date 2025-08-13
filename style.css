@@ -89,6 +89,21 @@ h2 {
     background-color: #CD5C5C; /* IndianRed */
 }
 
+#high-score-container {
+    margin-top: 20px;
+    font-size: 1.2em;
+    color: #555;
+    background-color: #f0f8ff; /* AliceBlue */
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+}
+
+#high-score {
+    font-weight: bold;
+    color: #FF6347; /* Tomato */
+}
+
 /* Game Screen Styles */
 #game-container {
     position: relative; /* For positioning mute button */
