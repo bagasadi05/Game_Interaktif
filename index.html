@@ -13,6 +13,11 @@
         <p>Pilih tingkat kesulitan dan jenis soal untuk memulai.</p>
         <div class="options-container">
             <div class="option-group">
+                <h2>Mode Game:</h2>
+                <button class="option-btn gameMode selected" data-game-mode="classic">Klasik</button>
+                <button class="option-btn gameMode" data-game-mode="timeAttack">Time Attack</button>
+            </div>
+            <div class="option-group">
                 <h2>Tingkat Kesulitan:</h2>
                 <button class="option-btn difficulty" data-difficulty="easy">Mudah</button>
                 <button class="option-btn difficulty" data-difficulty="medium">Sedang</button>
@@ -38,7 +43,12 @@
         <div id="game-container">
             <div id="stats-container">
                 <p>Skor: <span id="score">0</span></p>
-                <p>Soal: <span id="question-counter">1/5</span></p>
+                <div id="classic-stats">
+                    <p>Soal: <span id="question-counter">1/5</span></p>
+                </div>
+                <div id="time-attack-stats">
+                    <p>Waktu: <span id="timer">60</span></p>
+                </div>
             </div>
             <button id="mute-btn">🔊</button>
             <div id="adventure-area">

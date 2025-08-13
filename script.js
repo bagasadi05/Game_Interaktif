@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameScreen = document.getElementById('game-screen');
     const endScreen = document.getElementById('end-screen');
 
+    const gameModeButtons = document.querySelectorAll('.gameMode');
     const difficultyButtons = document.querySelectorAll('.difficulty');
     const operationButtons = document.querySelectorAll('.operation');
     const startGameBtn = document.getElementById('start-game-btn');
@@ -19,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const finalScoreElement = document.getElementById('final-score');
     const playerIcon = document.getElementById('player-icon');
     const highScoreElement = document.getElementById('high-score');
+    const timerElement = document.getElementById('timer');
 
     // Audio Elements
     const soundCorrect = document.getElementById('sound-correct');
@@ -30,9 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentQuestionIndex;
     let correctAnswer;
     let isMuted = false;
-    const TOTAL_QUESTIONS = 5;
+    let timerInterval;
+    let timeLeft;
+    const TIME_LIMIT = 60; // 60 seconds for Time Attack
+    const TOTAL_QUESTIONS = 5; // For Classic mode
 
     let gameSettings = {
+        gameMode: 'classic',
         difficulty: null,
         operation: null
     };
@@ -44,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
         multiplication_easy: { min: 2, max: 9 },
         multiplication_medium: { min: 3, max: 12 },
         multiplication_hard: { min: 5, max: 15 },
-        division_easy: { min: 2, max: 9 }, // Divisor range
+        division_easy: { min: 2, max: 9 },
         division_medium: { min: 3, max: 12 },
         division_hard: { min: 5, max: 15 }
     };
@@ -68,9 +74,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- High Score Logic ---
-    function getHighScoreKey(difficulty, operation) {
-        if (!difficulty || !operation) return null;
-        return `highscore-${difficulty}-${operation}`;
+    function getHighScoreKey(mode, difficulty, operation) {
+        if (!mode || !difficulty || !operation) return null;
+        return `highscore-${mode}-${difficulty}-${operation}`;
     }
 
     function getHighScore(key) {
@@ -82,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateHighScoreDisplay() {
-        const key = getHighScoreKey(gameSettings.difficulty, gameSettings.operation);
+        const key = getHighScoreKey(gameSettings.gameMode, gameSettings.difficulty, gameSettings.operation);
         if (key) {
             const highScore = getHighScore(key);
             highScoreElement.textContent = highScore;
@@ -120,16 +126,28 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         playSound(soundClick);
         score = 0;
-        currentQuestionIndex = 0;
-        updateUI();
+
         showScreen('game-screen');
-        nextQuestion();
+
+        if (gameSettings.gameMode === 'classic') {
+            gameScreen.classList.remove('time-attack-mode');
+            currentQuestionIndex = 0;
+            updateUI();
+            nextQuestion();
+        } else if (gameSettings.gameMode === 'timeAttack') {
+            gameScreen.classList.add('time-attack-mode');
+            updateUI();
+            startTimer();
+            generateQuestion();
+        }
     }
 
     function resetGame() {
         playSound(soundClick);
-        difficultyButtons.forEach(btn => btn.classList.remove('selected'));
-        operationButtons.forEach(btn => btn.classList.remove('selected'));
+        stopTimer();
+        document.querySelectorAll('.option-btn').forEach(btn => btn.classList.remove('selected'));
+        gameModeButtons[0].classList.add('selected');
+        gameSettings.gameMode = 'classic';
         gameSettings.difficulty = null;
         gameSettings.operation = null;
         playerIcon.style.left = '0px';
@@ -137,8 +155,26 @@ document.addEventListener('DOMContentLoaded', () => {
         showScreen('start-screen');
     }
 
+    // --- Timer Logic ---
+    function startTimer() {
+        timeLeft = TIME_LIMIT;
+        timerElement.textContent = timeLeft;
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            timerElement.textContent = timeLeft;
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
     // --- Core Game Loop ---
-    function nextQuestion() {
+    function nextQuestion() { // Classic Mode loop
         if (currentQuestionIndex >= TOTAL_QUESTIONS) {
             updateUI(true);
             setTimeout(endGame, 800);
@@ -156,16 +192,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function generateQuestion() {
         const { difficulty } = gameSettings;
         let operation = gameSettings.operation;
-
-        // If mode is 'mixed', pick a random operation for this question
         if (operation === 'mixed') {
             operation = OPERATIONS[Math.floor(Math.random() * OPERATIONS.length)];
         }
-
         const rangeKey = `${operation}_${difficulty}`;
         const defaultRangeKey = difficulty;
         const { min, max } = DIFFICULTY_RANGES[rangeKey] || DIFFICULTY_RANGES[defaultRangeKey];
-
         let num1, num2;
         let questionText;
 
@@ -190,15 +222,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 questionText = `Berapa ${num1} x ${num2}?`;
                 break;
             case 'division':
-                // Work backwards to ensure whole number result
                 const answer = Math.floor(Math.random() * (max - min + 1)) + min;
                 num2 = Math.floor(Math.random() * (max - min + 1)) + min;
+                if (num2 === 0) num2 = 1;
                 num1 = answer * num2;
                 correctAnswer = answer;
                 questionText = `Berapa ${num1} ÷ ${num2}?`;
                 break;
         }
         questionElement.textContent = questionText;
+        triggerAnimation(questionElement, 'fadeIn');
     }
 
     function checkAnswer() {
@@ -208,48 +241,60 @@ document.addEventListener('DOMContentLoaded', () => {
             feedbackElement.style.color = 'orange';
             return;
         }
-        submitBtn.disabled = true;
 
-        if (userAnswer === correctAnswer) {
+        let isCorrect = (userAnswer === correctAnswer);
+
+        if (isCorrect) {
             playSound(soundCorrect);
-            feedbackElement.textContent = "Benar! Hebat!";
+            feedbackElement.textContent = "Benar!";
             feedbackElement.style.color = 'green';
             score += 10;
             triggerAnimation(scoreElement, 'pop');
         } else {
             playSound(soundWrong);
-            feedbackElement.textContent = `Salah! Jawaban yang benar adalah ${correctAnswer}.`;
+            feedbackElement.textContent = `Salah!`;
             feedbackElement.style.color = 'red';
             triggerAnimation(gameScreen, 'shake');
         }
 
-        setTimeout(() => {
-            submitBtn.disabled = false;
-            nextQuestion();
-        }, 1800);
+        if (gameSettings.gameMode === 'classic') {
+            submitBtn.disabled = true;
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                nextQuestion();
+            }, 1000);
+        } else if (gameSettings.gameMode === 'timeAttack') {
+            updateUI();
+            if (isCorrect) {
+                generateQuestion();
+            }
+            answerInput.value = '';
+            answerInput.focus();
+        }
     }
 
     function endGame() {
+        stopTimer();
         finalScoreElement.textContent = score;
-
-        const key = getHighScoreKey(gameSettings.difficulty, gameSettings.operation);
+        const key = getHighScoreKey(gameSettings.gameMode, gameSettings.difficulty, gameSettings.operation);
         const currentHighScore = getHighScore(key);
         if (score > currentHighScore) {
             setHighScore(key, score);
             updateHighScoreDisplay();
         }
-
         showScreen('end-screen');
     }
 
     function updateUI(gameFinished = false) {
         scoreElement.textContent = score;
         if (gameScreen.classList.contains('active')) {
-            let progressIndex = gameFinished ? currentQuestionIndex : currentQuestionIndex - 1;
-            if (progressIndex < 0) progressIndex = 0;
-            questionCounterElement.textContent = `${currentQuestionIndex > TOTAL_QUESTIONS ? TOTAL_QUESTIONS : currentQuestionIndex}/${TOTAL_QUESTIONS}`;
-            const progress = progressIndex / TOTAL_QUESTIONS;
-            playerIcon.style.left = `calc(${progress * 100}% - ${progress * 40}px)`;
+            if (gameSettings.gameMode === 'classic') {
+                let progressIndex = gameFinished ? currentQuestionIndex : currentQuestionIndex - 1;
+                if (progressIndex < 0) progressIndex = 0;
+                questionCounterElement.textContent = `${currentQuestionIndex > TOTAL_QUESTIONS ? TOTAL_QUESTIONS : currentQuestionIndex}/${TOTAL_QUESTIONS}`;
+                const progress = progressIndex / TOTAL_QUESTIONS;
+                playerIcon.style.left = `calc(${progress * 100}% - ${progress * 40}px)`;
+            }
         }
     }
 
@@ -260,6 +305,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // === EVENT LISTENERS ===
+    handleOptionSelection(gameModeButtons, 'gameMode');
     handleOptionSelection(difficultyButtons, 'difficulty');
     handleOptionSelection(operationButtons, 'operation');
 

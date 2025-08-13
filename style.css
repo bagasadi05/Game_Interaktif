@@ -136,6 +136,17 @@ h2 {
     color: #555;
 }
 
+/* Mode-specific UI Toggling */
+#game-screen .time-attack-stats,
+#game-screen.time-attack-mode #classic-stats,
+#game-screen.time-attack-mode #adventure-area {
+    display: none;
+}
+
+#game-screen.time-attack-mode .time-attack-stats {
+    display: block;
+}
+
 #adventure-area {
     margin: 15px 0;
     padding: 10px;
